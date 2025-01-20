@@ -21,12 +21,22 @@
 
 namespace Lof\Affiliate\Model\ResourceModel;
 
-class AccountAffiliate extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
-{
-    protected $_resource;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
+class AccountAffiliate extends AbstractDb
+{
+    /**
+     * @var \Lof\Affiliate\Helper\Data
+     */
     protected $_dataHelper;
 
+    /**
+     * Constructor
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
+     * @param \Lof\Affiliate\Helper\Data $dataHelper
+     * @param string $connectionName
+     */
     public function __construct(
         \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Lof\Affiliate\Helper\Data $dataHelper,
@@ -68,6 +78,12 @@ class AccountAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstrac
         return $this;
     }
 
+    /**
+     * Check if tracking code already exists
+     *
+     * @param string $tracking_code
+     * @return bool
+     */
     public function checkTrackingCodeExists($tracking_code = '')
     {
         if ($tracking_code) {
@@ -88,6 +104,12 @@ class AccountAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstrac
         return false;
     }
 
+    /**
+     * Check if account exists by email
+     *
+     * @param string $email
+     * @return array
+     */
     public function checkAccountExist($email)
     {
         $table_name = $this->getTable('customer_entity');
@@ -101,5 +123,26 @@ class AccountAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstrac
         $binds = [':email' => $email];
         $collection = $connection->fetchCol($select, $binds);
         return $collection;
+    }
+
+    /**
+     * Load affiliate account by customer ID
+     *
+     * @param \Lof\Affiliate\Model\AccountAffiliate $accountAffiliate
+     * @param int $customerId
+     * @return $this
+     */
+    public function loadByCustomerId(\Lof\Affiliate\Model\AccountAffiliate $accountAffiliate, $customerId)
+    {
+        $connection = $this->getConnection();
+        $bind = ['customer_id' => $customerId];
+        $select = $connection->select()->from($this->getMainTable())
+            ->where('customer_id = :customer_id');
+
+        $data = $connection->fetchRow($select, $bind);
+        if ($data) {
+            $accountAffiliate->setData($data);
+        }
+        return $this;
     }
 }

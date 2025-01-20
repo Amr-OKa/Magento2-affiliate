@@ -32,7 +32,6 @@ class AccountAffiliate extends \Magento\Framework\Model\AbstractModel implements
     const STATUS_ENABLED = 1;
     const STATUS_DISABLED = 0;
 
-
     /**
      * URL Model instance
      *
@@ -142,25 +141,33 @@ class AccountAffiliate extends \Magento\Framework\Model\AbstractModel implements
     }
 
     /**
-     * get group id by customer id
-     *
-     * @param int $customerId
-     * @return int
-     */
-    public function getGroupId($customerId = 0)
-    {
-        if ($this->hasData("group_id")) {
-            return $this->getData("group_id");
+ * Get group id by customer id
+ *
+ * @param int $customerId
+ * @return int
+ */
+public function getGroupId($customerId = 0)
+{
+    if ($this->hasData("group_id")) {
+        return $this->getData("group_id");
+    } else {
+        // Replace the method `loadByCustomerId` with `loadByAttribute`
+        $account = $this->loadByAttribute('customer_id', $customerId);
+        $data = $account->getData();
+        if (!empty($data) && isset($data['group_id'])) {
+            return $data['group_id'];
         } else {
-            $account = $this->load($customerId, 'customer_id');
-            $data = $account->getData();
-            if (!empty($data)) {
-                return $data['group_id'];
-            } else {
-                return -1;
-            }
+            return -1;
         }
     }
+}
+
+public function loadByCustomerId($customerId)
+{
+    $this->_getResource()->loadByCustomerId($this, $customerId);
+    return $this;
+}
+
 
     /**
      * check affiliate exists by customer id
@@ -271,7 +278,6 @@ class AccountAffiliate extends \Magento\Framework\Model\AbstractModel implements
         return $affiliateAccount;
     }
 
-
     public function updateBalance($amount, $customer)
     {
         $customer_id = $customer->getId();
@@ -340,7 +346,6 @@ class AccountAffiliate extends \Magento\Framework\Model\AbstractModel implements
         }
         return $customers;
     }
-
 
     /**
      * Get ID

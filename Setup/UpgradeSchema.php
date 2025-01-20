@@ -38,6 +38,57 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $installer = $setup;
         $installer->startSetup();
 
+        // Add the lof_all_license table if it doesn't exist
+        if (version_compare($context->getVersion(), '1.0.1', '<')) {
+            if (!$installer->tableExists('lof_all_license')) {
+                /**
+                 * Create table 'lof_all_license'
+                 */
+                $table = $installer->getConnection()->newTable(
+                    $installer->getTable('lof_all_license')
+                )->addColumn(
+                    'license_id',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                    null,
+                    ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+                    'License ID'
+                )->addColumn(
+                    'extension_code',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    255,
+                    ['nullable' => false],
+                    'Extension Code'
+                )->addColumn(
+                    'license_key',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    255,
+                    ['nullable' => false],
+                    'License Key'
+                )->addColumn(
+                    'domain',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    255,
+                    ['nullable' => false],
+                    'Domain'
+                )->addColumn(
+                    'is_active',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    null,
+                    ['unsigned' => true, 'nullable' => false, 'default' => '0'],
+                    'Is Active'
+                )->addColumn(
+                    'created_at',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                    null,
+                    ['nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT],
+                    'Created At'
+                )->setComment(
+                    'Lof All License Table'
+                );
+                $installer->getConnection()->createTable($table);
+            }
+        }
+
         // $installer->getConnection()->dropColumn($installer->getTable('lof_affiliate_campaign'), 'group_id');
         if (version_compare($context->getVersion(), '1.0.2', '<')) {
             /**

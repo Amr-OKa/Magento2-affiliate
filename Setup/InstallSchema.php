@@ -34,10 +34,8 @@ class InstallSchema implements InstallSchemaInterface
         $installer->startSetup();
 
         $setup->getConnection()->dropTable($setup->getTable('lof_affiliate_commission'));
-
         $setup->getConnection()->dropTable($setup->getTable('lof_affiliate_campaign'));
         $setup->getConnection()->dropTable($setup->getTable('lof_affiliate_store'));
-
         $setup->getConnection()->dropTable($setup->getTable('lof_affiliate_group'));
         $setup->getConnection()->dropTable($setup->getTable('lof_affiliate_banner'));
         $setup->getConnection()->dropTable($setup->getTable('lof_affiliate_account'));
@@ -73,6 +71,52 @@ class InstallSchema implements InstallSchemaInterface
         foreach ($columns as $name => $definition) {
             $connection->addColumn($eavTable, $name, $definition);
         }
+
+        /**
+         * Create table 'lof_all_license'
+         */
+        $table = $installer->getConnection()->newTable(
+            $installer->getTable('lof_all_license')
+        )->addColumn(
+            'license_id',
+            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+            null,
+            ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
+            'License ID'
+        )->addColumn(
+            'extension_code',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Extension Code'
+        )->addColumn(
+            'license_key',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'License Key'
+        )->addColumn(
+            'domain',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            ['nullable' => false],
+            'Domain'
+        )->addColumn(
+            'is_active',
+            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            null,
+            ['unsigned' => true, 'nullable' => false, 'default' => '0'],
+            'Is Active'
+        )->addColumn(
+            'created_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+            null,
+            ['nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT],
+            'Created At'
+        )->setComment(
+            'Lof All License Table'
+        );
+        $installer->getConnection()->createTable($table);
 
         /**
          * table lof_affiliate_commission
@@ -1057,5 +1101,7 @@ class InstallSchema implements InstallSchemaInterface
             'Affiliate - Transaction Table'
         );
         $installer->getConnection()->createTable($table);
+
+        $installer->endSetup();
     }
 }

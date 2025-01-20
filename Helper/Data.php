@@ -211,6 +211,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $serial_number;
     }
 
+    /**
+ * Get affiliate account by customer ID
+ *
+ * @param int $customerId
+ * @return \Lof\Affiliate\Model\AccountAffiliate|null
+ */
+public function getAffiliateAccountByCustomerId($customerId)
+{
+    $affiliateAccount = $this->_accountAffiliate->create()->loadByCustomerId($customerId);
+
+    if ($affiliateAccount->getId()) {
+        return $affiliateAccount;
+    }
+
+    return null;
+}
+
+
     public function getConfig($key, $store = null, $default = '')
     {
         $store = $this->_storeManager->getStore($store);
@@ -1011,7 +1029,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function createAffiliateAccount($data, $customerData)
     {
         $fullname = $customerData->getFirstname() . ' ' . $customerData->getLastname();
-
+    
         /** @var \Lof\Affiliate\Model\AccountAffiliate|\Lof\Affiliate\Api\Data\AccountInterface */
         $accountModel = $this->_objectManager->create('Lof\Affiliate\Model\AccountAffiliate');
         $accountModel->load($customerData->getEmail(), 'email');
@@ -1019,11 +1037,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $tracking_code = $this->getAffiliateTrackingCode();
             $default_group_id = $this->getConfig("general_settings/default_affilate_group", null, 1);
             $auto_active_account = $this->getConfig("general_settings/auto_active_account", null, 0);
-
-
+    
+            // Ensure paypal_email is set
+            $paypalEmail = $data['paypal_email'] ?? '';
+    
             if (!empty($data)) {
                 $bank_account_name = $bank_account_number = $swift_code = $bank_name = $bank_branch_city = $bank_branch_country_code = $intermediary_bank_code = $intermediary_bank_name = $intermediary_bank_city = $intermediary_bank_country_code = "";
-
+    
                 if (isset($data['bank_account_name'])) {
                     $bank_account_name = $data['bank_account_name'];
                 }
@@ -1056,8 +1076,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
                 $accountModel
                     ->setDefaultPaymentMethod(isset($data['payment']) ? $data['payment'] : "paypal_email")
-                    ->setPaypalEmail($data['paypal_email'])
-                    ->setSkrillEmail($data['skrill_email'])
+                    ->setPaypalEmail($paypalEmail) // Use the paypal_email value
+                    ->setSkrillEmail($data['skrill_email'] ?? '')
                     ->setBankAccountName($bank_account_name)
                     ->setBankAccountNumber($bank_account_number)
                     ->setBankName($bank_name)
@@ -1070,7 +1090,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     ->setIntermediaryBankCountryCode($intermediary_bank_country_code)
                     ->setReferingWebsite(isset($data['refering_website']) ? $data['refering_website'] : "");
             }
-
+    
             $accountModel->setFirstname($customerData->getFirstname())
                 ->setLastname($customerData->getLastname())
                 ->setCommissionPaid('0')
@@ -1085,7 +1105,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $accountModel;
     }
-
     /**
      * get loaded account info by logged in customer
      * @return \Lof\Affiliate\Model\AccountAffiliate|\Lof\Affiliate\Api\Data\AccountInterface
