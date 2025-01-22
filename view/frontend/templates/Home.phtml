@@ -13,7 +13,7 @@
     <?= __("<h3>How Does It Work?</h3>");?>
     <?php if(!empty($campaigns)){
         foreach ($campaigns as $campaign) { ?>
-        <p><?= $campaign['description']; ?></p>
+        <p><?= $campaign['description'] ?? ''; ?></p>
        <?php } ?>
     <?php } else { ?>
     <?= __("<p>When you join our affiliate program, you will be supplied with a range of banners and text links to place wherever you like. When a user clicks on one of your links, they will be brought to our website and their activities will be tracked by our affiliate program. Once this user completes a purchase, you earn commission!</p>");?>
@@ -30,7 +30,7 @@
             <tbody>
                 <?php foreach ($campaigns as $campaign): ?>
                 <?php
-                $commissionList = $_helper->getComissionByCampaignID($campaign['campaign_id']);
+                $commissionList = $_helper->getComissionByCampaignID($campaign['campaign_id'] ?? '');
                 $total = count($commissionList);
                 $colspan = 0;
                 if($total == 0){
@@ -38,26 +38,26 @@
                 }
                 ?>
                 <tr>
-                    <td <?= $colspan?('colspan="'.$colspan.'"'):'';  ?>>
-                        <strong><?= $campaign['name']; ?></strong><br>
-                        <?php if ($campaign['enable_ppl']) { ?>
+                    <td <?= $colspan ? 'colspan="'.$colspan.'"' : ''; ?>>
+                        <strong><?= $campaign['name'] ?? ''; ?></strong><br>
+                        <?php if ($campaign['enable_ppl'] ?? false) { ?>
                             <strong><?= __('Pay Per Lead'); ?></strong><br>
-                            <span><?= __('Commission for each new account: ') . $_helper->symbolPrice($campaign['signup_commission']); ?></span><br>
-                            <span><?= __('Commission for each new subcribe: ') . $_helper->symbolPrice($campaign['subscribe_commission']); ?></span><br>
-                            <span><?= __('Maximum quantity of signup new account for each Affiliater: ') . $campaign['limit_account']; ?></span><br>
-                            <span><?= __('Maximum pay per lead balance for each Affiliater: ') . $campaign['limit_balance']; ?></span><br>
-                            <span><?= __('Maximum new account created from same IP address: ') . $campaign['limit_account_ip']; ?></span><br>
+                            <span><?= __('Commission for each new account: ') . $_helper->symbolPrice($campaign['signup_commission'] ?? 0); ?></span><br>
+                            <span><?= __('Commission for each new subcribe: ') . $_helper->symbolPrice($campaign['subscribe_commission'] ?? 0); ?></span><br>
+                            <span><?= __('Maximum quantity of signup new account for each Affiliater: ') . ($campaign['limit_account'] ?? ''); ?></span><br>
+                            <span><?= __('Maximum pay per lead balance for each Affiliater: ') . ($campaign['limit_balance'] ?? ''); ?></span><br>
+                            <span><?= __('Maximum new account created from same IP address: ') . ($campaign['limit_account_ip'] ?? ''); ?></span><br>
                         <?php } ?>
                             <strong><?= __('Pay Per Sale'); ?></strong><br>
-                        <span><?= __("base commission :");?> <?= $campaign['discount_action'] == 'by_percent' ? $campaign['discount_amount'] . '%' : $_helper->symbolPrice($campaign['discount_amount']); ?></span>
+                        <span><?= __("base commission :");?> <?= ($campaign['discount_action'] ?? '') == 'by_percent' ? ($campaign['discount_amount'] ?? 0) . '%' : $_helper->symbolPrice($campaign['discount_amount'] ?? 0); ?></span>
                     </td>
-                    <?php foreach ( $commissionList as $comission): ?>
+                    <?php foreach ($commissionList as $comission): ?>
                         <td>
-                            <strong><?= $comission['label']; ?></strong>
+                            <strong><?= $comission['label'] ?? ''; ?></strong>
                         </td>
                         <td>
-                            <span class="1st-value"><?= $comission['typeOrderValue']; ?></span>
-                            <span class="next-value"><?= $comission['typeOrderValueNext']; ?></span>
+                            <span class="1st-value"><?= $comission['typeOrderValue'] ?? ''; ?></span>
+                            <span class="next-value"><?= $comission['typeOrderValueNext'] ?? ''; ?></span>
                         </td>
                     <?php endforeach ?>
                     <?php
@@ -74,7 +74,7 @@
             </tbody>
         </table>
     </div>
-    <?php }else { ?>
+    <?php } else { ?>
     <div class="affiiate-page-title">
         <h1><?= __('Our Program!'); ?></h1>
     </div>
@@ -83,27 +83,17 @@
             <tbody>
                 <tr>
                     <td width="25%" rowspan="20">
-                        <?php if (isset($group['name'])): ?>
-                            <strong><?= $group['name']; ?></strong><br>
-                        <?php else: ?>
-                            <strong><?= __('Default Group Name'); ?></strong><br>
-                        <?php endif; ?>
-                        <?php if (isset($group['is_active']) && $group['is_active']): ?>
-                            <?php
-                            $unit = (isset($group['commission_action']) && $group['commission_action'] == 1) ? '%' : '';
-                            $commission = isset($group['commission']) ? $group['commission'] : '0';
-                            ?>
-                            <span><?= __('PAY PER SALE - commission : ') . $commission . $unit; ?></span><br>
-                            <?php if (isset($group['enable_ppl']) && $group['enable_ppl']): ?>
-                                <?php
-                                $unit1 = (isset($group['commission_ppl_action']) && $group['commission_ppl_action'] == 1) ? '%' : '';
-                                $commission_ppl = isset($group['commission_ppl']) ? $group['commission_ppl'] : '0';
-                                ?>
-                                <span><?= __('PAY PER LEAD - commission for each completed order : ') . $commission_ppl . $unit1; ?></span>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <span><?= __('Group is disabled'); ?></span>
-                        <?php endif; ?>
+                        <strong><?= $group['name'] ?? 'Group Name Not Available'; ?></strong><br>
+                        <?php if ($group['is_active'] ?? false) {
+                        $unit = ($group['commission_action'] ?? 0) == 1 ? '%' : ''; ?>
+                            <span><?= __('PAY PER SALE - commission : ') . ($group['commission'] ?? 0) . $unit; ?></span><br>
+                            <?php if ($group['enable_ppl'] ?? false) {
+                            $unit1 = ($group['commission_ppl_action'] ?? 0) == 1 ? '%' : '';  ?>
+                                <span><?= __('PAY PER LEAD - commission for each completed order : ') . ($group['commission_ppl'] ?? 0) . $unit1; ?></span>
+                            <?php } ?>
+                        <?php } else { ?>
+                            <span><?= __('Group is disable'); ?></span>
+                        <?php } ?>
                     </td>
                 </tr>
                 <?= $block->getChildHtml("affiliate.program.list"); ?>
@@ -115,13 +105,9 @@
     <div class="affiliateplus-account-bottom">
         <?php if (!$this->checkExistAccount()): ?>
             <div class="col-button col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                <!-- Updated Join Now Form -->
-                <form action="<?= $block->getUrl('affiliate/account/create') ?>" method="post" id="affiliate-join-form">
-                    <input type="hidden" name="form_key" value="<?= $block->getFormKey() ?>">
-                    <button type="submit" class="form-button btn-contact">
-                        <span><?= __("Join Now");?></span>
-                    </button>
-                </form>
+                <button class="form-button btn-contact" onclick="location.href='<?= $_helper->getBaseUrl().'affiliate/account/create';  ?>'">
+                    <span><?= __("Join Now");?></span>
+                </button>
             </div>
         <?php endif ?>
     </div>

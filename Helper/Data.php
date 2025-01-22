@@ -211,24 +211,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $serial_number;
     }
 
-    /**
- * Get affiliate account by customer ID
- *
- * @param int $customerId
- * @return \Lof\Affiliate\Model\AccountAffiliate|null
- */
-public function getAffiliateAccountByCustomerId($customerId)
-{
-    $affiliateAccount = $this->_accountAffiliate->create()->loadByCustomerId($customerId);
-
-    if ($affiliateAccount->getId()) {
-        return $affiliateAccount;
-    }
-
-    return null;
-}
-
-
     public function getConfig($key, $store = null, $default = '')
     {
         $store = $this->_storeManager->getStore($store);

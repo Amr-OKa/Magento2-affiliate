@@ -19,7 +19,7 @@
  * @license    https://landofcoder.com/LICENSE-1.0.html
  */
 
-namespace Lof\Affiliate\Ui\Component\Listing\Column\Cms;
+namespace Magento\Cms\Ui\Component\Listing\Column\Cms;
 
 use Magento\Store\Ui\Component\Listing\Column\Store\Options as StoreOptions;
 

@@ -32,9 +32,15 @@ class AccountAffiliate extends \Magento\Backend\Block\Widget\Grid\Container
     {
         $this->_controller = 'adminhtml_accountaffiliate';
         $this->_blockGroup = 'Lof_Affiliate';
-        $this->_headerText = __('Manage Accounts Affiliate');
+        $this->_headerText = __('Manage Account Affiliate');
 
         parent::_construct();
+
+        if ($this->_isAllowedAction('Lof_Affiliate::save')) {
+            $this->buttonList->update('add', 'label', __('Add New Account'));
+        } else {
+            $this->buttonList->remove('add');
+        }
     }
 
     /**

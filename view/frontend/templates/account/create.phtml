@@ -1,0 +1,8 @@
+<form action="<?= $block->getUrl('affiliate/account/create') ?>" method="post">
+    <div class="field">
+        <label for="paypal_email"><?= __('PayPal Email') ?></label>
+        <input type="email" name="paypal_email" id="paypal_email" placeholder="<?= __('Enter your PayPal email') ?>" required>
+    </div>
+    <!-- Other fields -->
+    <button type="submit" class="action primary"><?= __('Join Affiliate Program') ?></button>
+</form>

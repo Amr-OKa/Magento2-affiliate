@@ -1,5 +1,6 @@
 <?php
 /**
+ *
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
@@ -10,24 +11,32 @@ use Magento\Customer\Model\Registration;
 use Magento\Customer\Model\Session;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\App\Action\Context;
+use Lof\Affiliate\Model\AccountAffiliate;
 use Magento\Framework\Message\ManagerInterface;
-use Lof\Affiliate\Helper\Data as AffiliateHelper;
 
 class Create extends \Magento\Customer\Controller\AbstractAccount
 {
     /** @var Registration */
     protected $registration;
 
-    /** @var Session */
+    /**
+     * @var Session
+     */
     protected $session;
 
-    /** @var AffiliateHelper */
+    /**
+     * @var Helper
+     */
     protected $helper;
 
-    /** @var PageFactory */
+    /**
+     * @var PageFactory
+     */
     protected $resultPageFactory;
 
-    /** @var ManagerInterface */
+    /**
+     * @var ManagerInterface
+     */
     protected $messageManager;
 
     /**
@@ -35,7 +44,7 @@ class Create extends \Magento\Customer\Controller\AbstractAccount
      * @param Session $customerSession
      * @param PageFactory $resultPageFactory
      * @param Registration $registration
-     * @param AffiliateHelper $helper
+     * @param \Lof\Affiliate\Helper\Data $helper
      * @param ManagerInterface $messageManager
      */
     public function __construct(
@@ -43,7 +52,7 @@ class Create extends \Magento\Customer\Controller\AbstractAccount
         Session $customerSession,
         PageFactory $resultPageFactory,
         Registration $registration,
-        AffiliateHelper $helper,
+        \Lof\Affiliate\Helper\Data $helper,
         ManagerInterface $messageManager
     ) {
         $this->session = $customerSession;
@@ -61,42 +70,37 @@ class Create extends \Magento\Customer\Controller\AbstractAccount
      */
     public function execute()
     {
-        // Check if the user is logged in and registration is allowed
+        // Redirect if the user is not logged in or registration is not allowed
         if (!$this->session->isLoggedIn() || !$this->registration->isAllowed()) {
             $this->messageManager->addErrorMessage(__('You must be logged in to join the affiliate program.'));
             return $this->resultRedirectFactory->create()->setPath('customer/account/login');
         }
-    
-        // Check if the customer is already an affiliate
-        $customerId = $this->session->getCustomer()->getId();
-        $existingAffiliate = $this->helper->getAffiliateAccountByCustomerId($customerId);
-    
-        if ($existingAffiliate) {
-            $this->messageManager->addNoticeMessage(__('You are already part of the affiliate program.'));
-            return $this->resultRedirectFactory->create()->setPath('affiliate/account');
-        }
-    
-        // Process form data and create an affiliate account
+
+        // Get form data
         $postData = $this->getRequest()->getPostValue();
+
+        // Get customer data
         $customerData = $this->session->getCustomer();
         $data = [
-            'customer_id' => $customerId,
+            'customer_id' => $customerData->getId(),
             'email' => $customerData->getEmail(),
             'fullname' => $customerData->getName(),
-            'status' => 1,
+            'paypal_email' => $postData['paypal_email'] ?? '', // Add paypal_email from form submission
+            'status' => 1, // Set status to active
             'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
         ];
-    
+
         try {
-            // Call the helper function to create the affiliate account
+            // Create affiliate account
             $this->helper->createAffiliateAccount($data, $customerData);
             $this->messageManager->addSuccessMessage(__('You have successfully joined the affiliate program.'));
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage(__('An error occurred while creating your affiliate account. Please try again.'));
+            $this->messageManager->addErrorMessage($e->getMessage());
         }
-    
-        // Redirect to the affiliate account page
+
+        // Redirect to the affiliate dashboard or homepage
         return $this->resultRedirectFactory->create()->setPath('affiliate/account');
     }
 }

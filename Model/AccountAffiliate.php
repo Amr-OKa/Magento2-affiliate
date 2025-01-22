@@ -32,6 +32,7 @@ class AccountAffiliate extends \Magento\Framework\Model\AbstractModel implements
     const STATUS_ENABLED = 1;
     const STATUS_DISABLED = 0;
 
+
     /**
      * URL Model instance
      *
@@ -141,33 +142,27 @@ class AccountAffiliate extends \Magento\Framework\Model\AbstractModel implements
     }
 
     /**
- * Get group id by customer id
- *
- * @param int $customerId
- * @return int
- */
-public function getGroupId($customerId = 0)
-{
-    if ($this->hasData("group_id")) {
-        return $this->getData("group_id");
-    } else {
-        // Replace the method `loadByCustomerId` with `loadByAttribute`
-        $account = $this->loadByAttribute('customer_id', $customerId);
-        $data = $account->getData();
-        if (!empty($data) && isset($data['group_id'])) {
-            return $data['group_id'];
+     * get group id by customer id
+     *
+     * @param int $customerId
+     * @return int
+     */
+    public function getGroupId($customerId = 0)
+    {
+        if ($this->hasData("group_id")) {
+            return $this->getData("group_id");
         } else {
-            return -1;
+            $account = $this->load($customerId, 'customer_id');
+            $data = $account->getData();
+            
+            // Check if group_id exists in the returned data
+            if (!empty($data) && isset($data['group_id'])) {
+                return $data['group_id'];
+            } else {
+                return -1; // Return a default value or error code
+            }
         }
     }
-}
-
-public function loadByCustomerId($customerId)
-{
-    $this->_getResource()->loadByCustomerId($this, $customerId);
-    return $this;
-}
-
 
     /**
      * check affiliate exists by customer id
@@ -278,6 +273,7 @@ public function loadByCustomerId($customerId)
         return $affiliateAccount;
     }
 
+
     public function updateBalance($amount, $customer)
     {
         $customer_id = $customer->getId();
@@ -346,6 +342,7 @@ public function loadByCustomerId($customerId)
         }
         return $customers;
     }
+
 
     /**
      * Get ID

@@ -21,7 +21,7 @@
 
 namespace Lof\Affiliate\Block\Adminhtml;
 
-class WithdrawAffiliate extends \Magento\Backend\Block\Widget\Grid\Container
+class AccountAffiliate extends \Magento\Backend\Block\Widget\Grid\Container
 {
     /**
      * Block constructor
@@ -30,9 +30,9 @@ class WithdrawAffiliate extends \Magento\Backend\Block\Widget\Grid\Container
      */
     protected function _construct()
     {
-        $this->_controller = 'adminhtml_withdrawaffiliate';
+        $this->_controller = 'adminhtml_withdrawtaffiliate';
         $this->_blockGroup = 'Lof_Affiliate';
-        $this->_headerText = __('Manage Withdrawals Affiliate');
+        $this->_headerText = __('Manage Withdrawls Affiliate');
 
         parent::_construct();
     }
