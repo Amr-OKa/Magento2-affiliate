@@ -22,6 +22,7 @@
 namespace Lof\Affiliate\Model;
 
 use Lof\Affiliate\Api\Data\CampaignInterface;
+use Magento\Quote\Model\Quote\Address;
 
 class CampaignAffiliate extends \Magento\Rule\Model\AbstractModel implements CampaignInterface
 {
@@ -632,3 +633,4 @@ class CampaignAffiliate extends \Magento\Rule\Model\AbstractModel implements Cam
         return $this->setData(self::LIMIT_BALANCE, $limit_balance);
     }
 }
+?>

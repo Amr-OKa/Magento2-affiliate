@@ -54,6 +54,21 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * Initialize the collection
+     *
+     * @return void
+     */
+    protected function _initSelect()
+    {
+        parent::_initSelect();
+
+        // Exclude items with campaign_id = 0
+        $this->addFieldToFilter('campaign_id', ['neq' => 0]);
+
+        return $this;
+    }
+
+    /**
      * Returns pairs category_id - title
      *
      * @return array

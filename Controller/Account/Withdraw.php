@@ -1,23 +1,4 @@
 <?php
-/**
- * Landofcoder
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the venustheme.com license that is
- * available through the world-wide-web at this URL:
- * https://landofcoder.com/license
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade this extension to newer
- * version in the future.
- *
- * @category   Landofcoder
- * @package    Lof_Affiliate
- * @copyright  Copyright (c) 2016 Landofcoder (https://landofcoder.com)
- * @license    https://landofcoder.com/LICENSE-1.0.html
- */
 
 namespace Lof\Affiliate\Controller\Account;
 
@@ -38,9 +19,11 @@ class Withdraw extends \Magento\Framework\App\Action\Action
     protected $_helper;
 
     /**
-     * [__construct description]
+     * Constructor to initialize dependencies.
+     * 
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param Session $customerSession
      * @param \Lof\Affiliate\Helper\Data $helper
      */
     public function __construct(
@@ -56,25 +39,32 @@ class Withdraw extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * Affiliate Index, shows a list of recent blog posts.
+     * Handles the withdrawal page.
      *
      * @return \Magento\Framework\View\Result\PageFactory
      */
     public function execute()
     {
+        // If the affiliate is not logged in, redirect to the login page.
         if (!$this->session->isLoggedIn()) {
             /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
             $resultRedirect = $this->resultRedirectFactory->create();
             $resultRedirect->setPath('affiliate/account/login');
             return $resultRedirect;
         }
+
+        // Check if withdrawal is enabled in the configuration.
         $enable_withdrawl = $this->_helper->getConfig("general_settings/enable_withdrawl");
-        if(!$enable_withdrawl) {
+
+        // If withdrawals are disabled, redirect to the affiliate home page.
+        if (!$enable_withdrawl) {
             /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
             $resultRedirect = $this->resultRedirectFactory->create();
             $resultRedirect->setPath('affiliate/affiliate/home');
             return $resultRedirect;
         }
+
+        // Generate the withdrawal page if everything is set up correctly.
         /** @var \Magento\Framework\View\Result\Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Your Withdrawals'));

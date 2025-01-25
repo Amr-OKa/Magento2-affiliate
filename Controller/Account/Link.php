@@ -22,45 +22,64 @@
 namespace Lof\Affiliate\Controller\Account;
 
 use Magento\Customer\Model\Session;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\Controller\Result\RedirectFactory;
 
 class Link extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var \Magento\Framework\View\Result\PageFactory
+     * @var PageFactory
      */
     protected $resultPageFactory;
+
+    /**
+     * @var Session
+     */
     protected $session;
 
     /**
-     * [__construct description]
+     * @var RedirectFactory
+     */
+    protected $resultRedirectFactory;
+
+    /**
+     * Constructor
+     *
      * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param PageFactory $resultPageFactory
+     * @param Session $customerSession
+     * @param RedirectFactory $resultRedirectFactory
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        Session $customerSession
+        PageFactory $resultPageFactory,
+        Session $customerSession,
+        RedirectFactory $resultRedirectFactory
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->session = $customerSession;
+        $this->resultRedirectFactory = $resultRedirectFactory;
         parent::__construct($context);
     }
 
     /**
-     * Affiliate Index, shows a list of recent blog posts.
+     * Show Banners & Links Page
      *
-     * @return \Magento\Framework\View\Result\PageFactory
+     * @return \Magento\Framework\Controller\Result\Page
      */
     public function execute()
     {
-        $resultRedirect = $this->resultRedirectFactory->create();
-        if ($this->session->isLoggedIn()) {
-            $resultPage = $this->resultPageFactory->create();
-            $resultPage->getConfig()->getTitle()->set(__('Banners & Links'));
-            return $resultPage;
-        } else {
+        // Redirect to login page if user is not logged in
+        if (!$this->session->isLoggedIn()) {
+            $resultRedirect = $this->resultRedirectFactory->create();
             $resultRedirect->setPath('affiliate/account/login');
             return $resultRedirect;
         }
+
+        // Render the Banners & Links page if the user is logged in
+        $resultPage = $this->resultPageFactory->create();
+        $resultPage->getConfig()->getTitle()->set(__('Banners & Links'));
+
+        return $resultPage;
     }
 }

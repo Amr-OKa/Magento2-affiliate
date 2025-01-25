@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
@@ -18,6 +17,8 @@ class LogoutSuccess extends \Magento\Customer\Controller\AbstractAccount
     protected $resultPageFactory;
 
     /**
+     * Constructor to inject dependencies
+     *
      * @param Context $context
      * @param PageFactory $resultPageFactory
      */
@@ -30,12 +31,16 @@ class LogoutSuccess extends \Magento\Customer\Controller\AbstractAccount
     }
 
     /**
-     * Logout success page
+     * Execute the action to show logout success page
      *
      * @return \Magento\Framework\View\Result\Page
      */
     public function execute()
     {
+        // Optionally, add a custom message here for user confirmation
+        $this->messageManager->addSuccessMessage(__('You have been successfully logged out.'));
+
+        // Render the logout success page
         return $this->resultPageFactory->create();
     }
 }

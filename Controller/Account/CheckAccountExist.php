@@ -27,44 +27,77 @@ class CheckAccountExist extends \Magento\Framework\App\Action\Action
      * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $resultPageFactory;
+
     /**
      * @var \Lof\Affiliate\Model\AccountAffiliate
      */
     protected $_accountAff;
 
-    protected $_resourceAccount;
+    /**
+     * @var \Magento\Framework\Controller\Result\JsonFactory
+     */
+    protected $_jsonFactory;
 
     /**
-     * [__construct description]
+     * @var \Magento\Framework\Escaper
+     */
+    protected $_escaper;
+
+    /**
+     * Constructor
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param \Lof\Affiliate\Model\AccountAffiliate $accountAffiliate
+     * @param \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
+     * @param \Magento\Framework\Escaper $escaper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Lof\Affiliate\Model\AccountAffiliate $accountAffiliate
-    )
-    {
+        \Lof\Affiliate\Model\AccountAffiliate $accountAffiliate,
+        \Magento\Framework\Controller\Result\JsonFactory $jsonFactory,
+        \Magento\Framework\Escaper $escaper
+    ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->_accountAff = $accountAffiliate;
+        $this->_jsonFactory = $jsonFactory;
+        $this->_escaper = $escaper;
         parent::__construct($context);
     }
 
     /**
-     * Affiliate Index, shows a list of recent blog posts.
+     * Execute the action to check if the email is already registered
      *
-     * @return \Magento\Framework\View\Result\PageFactory
+     * @return \Magento\Framework\Controller\Result\Json
      */
     public function execute()
     {
         $email_address = $this->getRequest()->getParam('email_address');
-        $message = '';
-        $account = $this->_accountAff->checkAccExist($email_address);
-        if (!empty($account)) {
-            $message .= '<div class=\'mage-success\' style="color:red">You can\'t use this email address.</div><input type="hidden" id="is_valid_email" name="is_valid_email" value="0"/>';
-        } else {
-            $message .= '<div class=\'mage-success\' style="color:blue">You can use this email address.</div><input type="hidden" id="is_valid_email" name="is_valid_email" value="1"/>';
+        $response = $this->_jsonFactory->create();
+
+        if (!$email_address) {
+            $response->setData([
+                'message' => $this->_escaper->escapeHtml('Email address is required.'),
+                'is_valid_email' => 0
+            ]);
+            return $response;
         }
-        echo $message;
+
+        // Check if account exists with the provided email
+        $account = $this->_accountAff->checkAccExist($email_address);
+
+        if (!empty($account)) {
+            $response->setData([
+                'message' => $this->_escaper->escapeHtml('You can\'t use this email address.'),
+                'is_valid_email' => 0
+            ]);
+        } else {
+            $response->setData([
+                'message' => $this->_escaper->escapeHtml('You can use this email address.'),
+                'is_valid_email' => 1
+            ]);
+        }
+
+        return $response;
     }
 }

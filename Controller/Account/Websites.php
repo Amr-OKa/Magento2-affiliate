@@ -10,7 +10,8 @@ class Websites extends \Magento\Framework\App\Action\Action
     protected $resultPageFactory;
 
     /**
-     * [__construct description]
+     * Constructor to initialize dependencies.
+     * 
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      */
@@ -23,7 +24,7 @@ class Websites extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * Affiliate Index, shows a list of recent blog posts.
+     * Execute function that renders the page.
      *
      * @return \Magento\Framework\View\Result\PageFactory
      */

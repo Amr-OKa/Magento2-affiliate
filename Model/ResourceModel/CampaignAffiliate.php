@@ -21,6 +21,8 @@
 
 namespace Lof\Affiliate\Model\ResourceModel;
 
+use Magento\Framework\Exception\LocalizedException;
+
 class CampaignAffiliate extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 {
     /**
@@ -76,6 +78,12 @@ class CampaignAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstra
      */
     protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
     {
+        // Ensure campaign_id is set
+        if (!$object->getId() && !$object->getCampaignId()) {
+            throw new LocalizedException(__('Campaign ID is required.'));
+        }
+
+        // Generate tracking code if not set
         if (!$object->getId()) {
             for ($i = 1; $i <= 10; $i++) {
                 if ($this->checkTrackingCodeExists($object->getTrackingCode())) {
@@ -86,9 +94,16 @@ class CampaignAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstra
                 }
             }
         }
-        return $this;
+
+        return parent::_beforeSave($object);
     }
 
+    /**
+     * Check if tracking code already exists
+     *
+     * @param string $tracking_code
+     * @return bool
+     */
     public function checkTrackingCodeExists($tracking_code = '')
     {
         if ($tracking_code) {
@@ -129,7 +144,7 @@ class CampaignAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstra
                 try {
                     $this->getConnection()->insertMultiple($table, $data);
                 } catch (\Exception $e) {
-                    throw new FrameworkException ($e->getMessage());
+                    throw new LocalizedException(__($e->getMessage()));
                 }
             }
         }
@@ -180,7 +195,18 @@ class CampaignAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstra
                 );
             $posts = $connection->fetchAll($select);
             $object->setData('posts', $posts);
-            $object->setData('commission', unserialize($object->getData('commission')));
+
+            // Fix: Handle null or empty commission data
+            $commissionData = $object->getData('commission');
+            if ($commissionData) {
+                try {
+                    $object->setData('commission', unserialize($commissionData));
+                } catch (\Exception $e) {
+                    $object->setData('commission', []);
+                }
+            } else {
+                $object->setData('commission', []);
+            }
         }
         return parent::_afterLoad($object);
     }
@@ -282,7 +308,12 @@ class CampaignAffiliate extends \Magento\Framework\Model\ResourceModel\Db\Abstra
         return $connection->fetchCol($select, $binds);
     }
 
-
+    /**
+     * Get group ids to which specified item is assigned
+     *
+     * @param int $id
+     * @return array
+     */
     public function lookupGroupIds($id)
     {
         $connection = $this->getConnection();

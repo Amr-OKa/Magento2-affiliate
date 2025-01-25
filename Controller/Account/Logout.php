@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
@@ -18,6 +17,8 @@ class Logout extends \Magento\Customer\Controller\AbstractAccount
     protected $session;
 
     /**
+     * Constructor
+     *
      * @param Context $context
      * @param Session $customerSession
      */
@@ -36,13 +37,21 @@ class Logout extends \Magento\Customer\Controller\AbstractAccount
      */
     public function execute()
     {
+        // Store the current customer ID before logging out
         $lastCustomerId = $this->session->getId();
-        $this->session->logout()->setBeforeAuthUrl($this->_redirect->getRefererUrl())
+
+        // Log the customer out and set the before authentication URL
+        $this->session->logout()
+            ->setBeforeAuthUrl($this->_redirect->getRefererUrl()) // Redirect user back to the previous page after logout
             ->setLastCustomerId($lastCustomerId);
 
+        // Prepare a redirect result and send the user to a logout success page or home page
         /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
-        $resultRedirect->setPath('*/*/logoutSuccess');
+
+        // Optionally, you can redirect to a custom success page here
+        $resultRedirect->setPath('affiliate/account/login'); // Redirect user to the login page after logout
+
         return $resultRedirect;
     }
 }

@@ -22,30 +22,40 @@
 namespace Lof\Affiliate\Controller\Account;
 
 use Magento\Customer\Model\Session;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\Controller\Result\RedirectFactory;
+use Lof\Affiliate\Model\AccountAffiliate;
 
 class Login extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var \Magento\Framework\View\Result\PageFactory
+     * @var PageFactory
      */
     protected $resultPageFactory;
+
     /**
      * @var Session
      */
     protected $session;
 
+    /**
+     * @var AccountAffiliate
+     */
     protected $_accountAffiliate;
 
     /**
-     * [__construct description]
+     * Constructor
+     *
      * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param PageFactory $resultPageFactory
+     * @param Session $customerSession
+     * @param AccountAffiliate $accountAffiliate
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        PageFactory $resultPageFactory,
         Session $customerSession,
-        \Lof\Affiliate\Model\AccountAffiliate $accountAffiliate
+        AccountAffiliate $accountAffiliate
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->session = $customerSession;
@@ -54,19 +64,27 @@ class Login extends \Magento\Framework\App\Action\Action
     }
 
     /**
-     * Affiliate Index, shows a list of recent blog posts.
+     * Executes the login check and shows the appropriate page.
      *
-     * @return \Magento\Framework\View\Result\PageFactory
+     * @return \Magento\Framework\Controller\Result\Page|\Magento\Framework\Controller\Result\Redirect
      */
     public function execute()
     {
-        $emailCustomer = $this->session->getCustomer()->getEmail();
-        $checkAccountExist = $this->_accountAffiliate->checkAccountExist($emailCustomer);
-        if ($this->session->isLoggedIn() && $checkAccountExist == '1') {
-            $resultRedirect = $this->resultRedirectFactory->create();
-            $resultRedirect->setPath('*/*/edit');
-            return $resultRedirect;
+        // Check if the customer is already logged in
+        if ($this->session->isLoggedIn()) {
+            $emailCustomer = $this->session->getCustomer()->getEmail();
+            // Check if the affiliate account exists
+            $checkAccountExist = $this->_accountAffiliate->checkAccountExist($emailCustomer);
+
+            // If account exists, redirect to account edit page
+            if ($checkAccountExist == '1') {
+                $resultRedirect = $this->resultRedirectFactory->create();
+                $resultRedirect->setPath('*/*/edit');
+                return $resultRedirect;
+            }
         }
+
+        // If not logged in or no affiliate account, display the login page
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->prepend(__('Affiliate Login'));
         return $resultPage;

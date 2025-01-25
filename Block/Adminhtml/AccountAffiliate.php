@@ -19,7 +19,7 @@
  * @license    https://landofcoder.com/LICENSE-1.0.html
  */
 
-namespace Lof\Affiliate\Block\Adminhtml;
+ namespace Lof\Affiliate\Block\Adminhtml;
 
 class AccountAffiliate extends \Magento\Backend\Block\Widget\Grid\Container
 {
@@ -30,17 +30,11 @@ class AccountAffiliate extends \Magento\Backend\Block\Widget\Grid\Container
      */
     protected function _construct()
     {
-        $this->_controller = 'adminhtml_accountaffiliate';
+        $this->_controller = 'adminhtml_withdrawtaffiliate';
         $this->_blockGroup = 'Lof_Affiliate';
-        $this->_headerText = __('Manage Account Affiliate');
+        $this->_headerText = __('Manage Withdrawls Affiliate');
 
         parent::_construct();
-
-        if ($this->_isAllowedAction('Lof_Affiliate::save')) {
-            $this->buttonList->update('add', 'label', __('Add New Account'));
-        } else {
-            $this->buttonList->remove('add');
-        }
     }
 
     /**

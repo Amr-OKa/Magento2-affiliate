@@ -21,15 +21,6 @@ class Price extends Column
      */
     protected $priceFormatter;
 
-    /**
-     * Constructor
-     *
-     * @param ContextInterface $context
-     * @param UiComponentFactory $uiComponentFactory
-     * @param PriceCurrencyInterface $priceFormatter
-     * @param array $components
-     * @param array $data
-     */
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
@@ -50,10 +41,17 @@ class Price extends Column
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
-            foreach ($dataSource['data']['items'] as & $item) {
-                $currencyCode = isset($item['base_currency_code']) ? $item['base_currency_code'] : null;
-                $item[$this->getData('name')] = $this->priceFormatter->format(
-                    $item[$this->getData('name')],
+            $fieldName = $this->getData('name');
+            
+            foreach ($dataSource['data']['items'] as &$item) {
+                // Handle undefined 'balance' key with null coalescing operator
+                $value = $item[$fieldName] ?? 0;
+                
+                // Handle currency code fallback
+                $currencyCode = $item['base_currency_code'] ?? null;
+
+                $item[$fieldName] = $this->priceFormatter->format(
+                    $value,
                     false,
                     PriceCurrencyInterface::DEFAULT_PRECISION,
                     null,
